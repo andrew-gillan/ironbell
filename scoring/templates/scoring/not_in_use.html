@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ scoring_station }}</title>
+    <script src="/static/jquery-2.0.3.min.js"></script>
+    <script src="/static/scoring.js"></script>
+    <script language="JavaScript">
+        $(document).ready(function(){
+            $(window).load(function(){
+                doCenter();
+            });
+            $(window).resize(function(){
+                doCenter();
+            });
+            // To initially run the centering function:
+            $(window).load();
+
+            setInterval(function(){checkForNextEvent()}, 3000);
+        });
+
+        function checkForNextEvent() {
+            var current_event_id = {{ current_event_id }};
+            var station_num = {{ station_num }};
+            var target = "{{ target }}";
+
+            // setup a redirect
+            var currentPath = document.location.pathname;
+
+            //                               comp     evt       stn
+            // Spectator URL example: /scoring/1/event/1/station/1/
+            // Timing URL example:    /scoring/1/event/1/timer/
+            // Judging URL example:   /scoring/1/event/1/judging/1/
+
+            var newURL = window.location.protocol + "//" + window.location.host;
+            var pathArray = currentPath.split( '/' );
+
+            newURL += "/" + pathArray[1];       // 'scoring'
+            newURL += "/" + pathArray[2];       // <competition id>
+            newURL += "/" + pathArray[3];       // 'event'
+            newURL += "/" + current_event_id;   // <event_id>
+            newURL += "/" + target;
+
+            if ( target != "timer" ) {
+                 newURL += "/" + station_num;
+            }
+
+            window.location.href = newURL;
+        }
+    </script>
+    <link rel="stylesheet" type="text/css" href="/static/style.css">
+</head>
+<body class="comp-text">
+
+    <div id="header">
+        <div id="header-inner">
+            <h2>
+                Event: {{ event_name }}<br />
+                Station: {{ station_num }}<br />
+            </h2>
+        </div>
+    </div>
+
+    <div id="score" class="na comp-text">Waiting for next event.</div>
+
+</body>
+</html>

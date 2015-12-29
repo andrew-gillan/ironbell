@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ event.name }}</title>
+    <script src="/static/jquery-2.0.3.min.js"></script>
+    <script src="/static/scoring.js"></script>
+    <script language="JavaScript">
+        $(document).ready(function() {
+            $(window).load(function() {
+                doCenter();
+            });
+            $(window).resize(function() {
+                doCenter();
+            });
+            // To initially run the centering function:
+            $(window).load();
+        });
+        setInterval(function(){ getTimer({{event.id}}, {{event.current_event_id}}, false) }, 250);
+    </script>
+    <link rel="stylesheet" type="text/css" href="/static/style.css">
+</head>
+<body class="comp-text">
+
+    <div id="header">
+        <div id="header-inner">
+            <h2>Event - {{ event.name }}</h2>
+            <div>Scheduled start time: {{ event.scheduled_start_datetime }}</div>
+        </div>
+    </div>
+
+    <div id="timer-large" class="timer-large comp-text">00:00</div>
+
+    <!-- div id="footer">
+        <div id="footer-inner">
+            <img style="position:absolute;right:20px;height:100px;" src="/static/logosc.jpg" />
+        </div>
+    </div -->
+
+</body>
+</html>

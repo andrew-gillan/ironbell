@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ competition.name }}</title>
+    <link rel="stylesheet" type="text/css" href="/static/style.css">
+    <script src="/static/jquery-2.0.3.min.js"></script>
+    <script language="JavaScript">
+        $(document).ready(function() {
+            setTimeout(function() {
+                window.location.reload(1);
+            }, 20000);
+            $(window).load(function() {
+                var w = $(window);
+                var row = $('#current_event');
+                if (row.length) {
+                    var pos = row.offset().top - (w.height()/2);
+                    var body = $("body, html");
+                    body.animate({scrollTop:pos}, '2000');
+                }
+            });
+        });
+    </script>
+</head>
+<body class="comp-text">
+
+    <div id="header">
+        <div id="header-inner">
+            <h2>Competition - {{ competition.name }}</h2>
+            <table class="header">
+                <tr><td>Location:</td><td>{{ competition.location}}</td></tr>
+                <tr><td>Start date:</td><td>{{ competition.start_date }}</td></tr>
+                <tr><td>End date:</td><td>{{ competition.end_date }} minutes</td></tr>
+            </table>
+        </div>
+    </div>
+
+    <h2></h2>
+    <table id="competitions" class="content">
+        <thead>
+            <tr>
+                <th>Event</th>
+                <th>Scheduled Start</th>
+                <th>Event Type</th>
+            </tr>
+        </thead>
+        {% for event in competition.event_set.all %}
+        {% if event.id == event.current_event_id %}
+        <tr id="current_event">
+        {% else %}
+        <tr>
+        {% endif %}
+            {% if event.id == event.current_event_id %}
+            <td>&#10148; <a href="event/{{ event.id }}/">{{ event.name }}</a></td>
+            {% else %}
+            <td><a href="event/{{ event.id }}/">{{ event.name }}</a></td>
+            {% endif %}
+            <td>{{ event.scheduled_start_datetime }}</td>
+            <td>{{ event.get_event_type_display }}</td>
+        </tr>
+        <tr>
+            <td>
+                <table>
+                    <tr>
+                        <th>Station</th>
+                        <th>Athlete</th>
+                        <th>Score</th>
+                        <th>Weight Class</th>
+                        <th>Bell Weight</th>
+                    </tr>
+                    {% for scoring_station in event.sorted_scoringstation_set.all %}
+                    <tr>
+                        <td>{{ scoring_station.station_num }}</td>
+                        <td>{{ scoring_station.athlete.name }}</td>
+                        <td>{{ scoring_station.score}}</td>
+                        <td>{{ scoring_station.athlete.weight_class}}</td>
+                        <td>{{ scoring_station.athlete.get_apparatus_weight_display}}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <div id="footer">
+        <div id="footer-inner">
+            <img style="position:absolute;right:20px;height:100px;" src="/static/logosc.jpg" />
+        </div>
+    </div>
+
+</body>
+</html>

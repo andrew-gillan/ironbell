@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ event.name }}</title>
+    <link rel="stylesheet" type="text/css" href="/static/style.css">
+</head>
+<body class="comp-text">
+
+    <div id="header">
+        <div id="header-inner">
+            <h2>Event - {{ event.name }}</h2>
+            <table class="header">
+                <tr><td>Location:</td><td>{{ event.location}}</td></tr>
+                <tr><td>Scheduled start:</td><td>{{ event.scheduled_start_datetime }}</td></tr>
+                <tr><td>Duration:</td><td>{{ event.duration_minutes }} minutes</td></tr>
+            </table>
+        </div>
+    </div>
+
+    <h2>Scoring Stations</h2>
+        <table class="content">
+        <tr>
+            <th>Station</th>
+            <th>Athlete</th>
+            <th>Score</th>
+            <th>Weight Class</th>
+            <th>Bell Weight</th>
+            <th>Judge</th>
+            <th style="text-align: center;">Spectator</th>
+            <th style="text-align: center;">Timing</th>
+            <th style="text-align: center;">Judging</th>
+            <th style="text-align: center;">Score</th>
+        </tr>
+        {% for scoring_station in event.sorted_scoringstation_set.all %}
+        <tr>
+            <td>{{ scoring_station.station_num }}</td>
+            <td>{{ scoring_station.athlete.name }}</td>
+            <td>{{ scoring_station.score}}</td>
+            <td>{{ scoring_station.athlete.weight_class}}</td>
+            <td>{{ scoring_station.athlete.get_apparatus_weight_display}}</td>
+            <td>{{ scoring_station.judge.name }}</td>
+            <td style="text-align: center;"><a href="station/{{ scoring_station.station_num }}/"><img src="/static/search.png" height="20px" /></a></td>
+            <td style="text-align: center;"><a href="timer/"><img src="/static/search.png" height="20px" /></a></td>
+            <td style="text-align: center;"><a href="judging/{{ scoring_station.station_num }}/"><img src="/static/search.png" height="20px" /></a></td>
+            <td style="text-align: center;"><a href="station_score/{{ scoring_station.station_num }}/"><img src="/static/search.png" height="20px" /></a></td>
+        </tr>
+        {% endfor %}
+        </table>
+
+    <div id="footer">
+        <div id="footer-inner">
+            <img style="position:absolute;right:20px;height:100px;" src="/static/logosc.jpg" />
+        </div>
+    </div>
+
+</body>
+</html>

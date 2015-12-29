@@ -1,0 +1,5 @@
+docker build --build-arg USER_ID=$(id -u) -t com1/ironbell:v0.1 .
+
+docker run --rm -it --publish=8000:8000 --net="host" -v /home/andrew/Projects/ironbell:/usr/local/ironbell com1/ironbell:v0.1
+
+python usr/local/ironbell/scoring/manage.py runserver

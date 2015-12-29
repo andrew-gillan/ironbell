@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ scoring_station }}</title>
+    <script src="/static/jquery-2.0.3.min.js"></script>
+    <script src="/static/scoring.js"></script>
+    <script language="JavaScript">
+        $(document).ready(function(){
+            $(window).load(function(){
+                doCenter();
+            });
+            $(window).resize(function(){
+                doCenter();
+            });
+            // To initially run the centering function:
+            $(window).load();
+            setInterval(function(){ getScoreAndTiming({{ scoring_station.event.id }}, {{ scoring_station.station_num }}) }, 250);
+        });
+    </script>
+    <link rel="stylesheet" type="text/css" href="/static/style.css">
+</head>
+<body class="comp-text">
+
+    <div id="header">
+        <div id="header-inner">
+            <h2>
+                Event: {{ scoring_station.event.name }}<br />
+            </h2>
+
+            <h3>
+                Viewing Station &#x2799; {{ scoring_station.station_num }}<br />
+                Judge: {{ scoring_station.judge.name }}<br />
+                Athlete: {{ scoring_station.athlete.name }}
+            </h3>
+        </div>
+    </div>
+
+    <!-- show a large score display for the athlete to see -->
+    <div id="score" class="timer-large comp-text">{{ scoring_station.score }}</div>
+
+</body>
+</html>

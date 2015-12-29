@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Kettlebell Competitions</title>
+    <link rel="stylesheet" type="text/css" href="/static/style.css">
+</head>
+<body class="comp-text">
+
+    <div id="header">
+        <div id="header-inner">
+            <h1>Kettlebell Competitions</h1>
+        </div>
+    </div>
+
+{% if competition_list %}
+    <ul>
+    {% for competition in competition_list %}
+        <li><a href="/scoring/{{ competition.id }}/">{{ competition.name }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No competitions are available.</p>
+{% endif %}
+
+    <div id="footer">
+        <div id="footer-inner">
+            <img style="position:absolute;right:20px;height:100px;" src="/static/logosc.jpg" />
+        </div>
+    </div>
+
+</body>
+</html>
