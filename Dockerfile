@@ -16,10 +16,10 @@ RUN apt-get update && apt-get install -y \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
-RUN pip install django==1.7.11
+RUN pip install django==1.6.11
 RUN pip install suit==2.0.2
 RUN pip install django_extensions==1.6.1
-RUN pip install djangorestframework==3.3.2
+RUN pip install djangorestframework==2.4.8
 
 # Clone project from github
 # RUN git clone https://github.com/andrew-gillan/ironbell.git /usr/local/ironbell
