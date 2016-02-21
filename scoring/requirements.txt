@@ -1,9 +1,9 @@
-Django==1.7.11
+Django==1.6.11
 argparse==1.2.1
 chardet==2.0.1
 colorama==0.2.5
 django-extensions==1.6.1
-djangorestframework==3.3.2
+djangorestframework==2.4.8
 docutils==0.12
 html5lib==0.999
 requests==2.2.1
