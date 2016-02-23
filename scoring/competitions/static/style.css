@@ -9,9 +9,9 @@ table,th,td {
 table.header, table.header th, table.header td {border:0;padding-left:10px;padding-bottom:5px;}
 table.content th, table.content td {padding:10px;}
 .score {font-size: 50vh;}
-.comp-text {color: darkblue;}
+.comp-text {color: black;}
 .timer {
-    float: right;font-size: 12vh;
+    float: right;font-size: 20vh;
 }
 .na{
     text-align: center;font-size: 12vh;
@@ -36,7 +36,7 @@ table.content th, table.content td {padding:10px;}
     padding-top: 1px;
     padding-bottom: 10px;
     color: white;
-    background-color: rgb(48,142,76);
+    background-color: rgb(0,91,138);
     padding-left: 10px;
     margin-right: 1px;
     height: 100%;
