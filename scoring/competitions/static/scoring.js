@@ -17,7 +17,12 @@ function getScoreAndTiming(eventId, stationNum){
         url: '/api/score/' + eventId + "/" + stationNum,
         success: function(data){
             var score = data.score;
-            document.getElementById("score").innerHTML = score;
+            if ( document.getElementById("score") != null ) {
+                document.getElementById("score").innerHTML = score;
+            }
+            if ( document.getElementById("score-half") != null ) {
+                document.getElementById("score-half").innerHTML = score;
+            }
             doCenter();
 
             var timer = data.event;
@@ -28,7 +33,9 @@ function getScoreAndTiming(eventId, stationNum){
             if ( document.getElementById("timer-large") != null ) {
                 document.getElementById("timer-large").innerHTML = timer;
             }
-
+            if ( document.getElementById("timer-half") != null ) {
+                document.getElementById("timer-half").innerHTML = timer;
+            }
             checkCurrentEvent(data, eventId);
         }
     });

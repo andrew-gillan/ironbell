@@ -18,7 +18,15 @@ table.content th, table.content td {padding:10px;}
 }
 .timer-large {
     width: 100%;
-    font-size: 40vw;text-align: center;
+    font-size: 40vh;text-align: center;
+}
+.timer-half {
+   font-size: 40vh;
+   text-align: center; 
+}
+.score-half {
+   font-size: 40vh;
+   text-align: center;
 }
 #increment {
     float: left;

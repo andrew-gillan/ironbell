@@ -34,7 +34,8 @@ def station(request, event_id, station_num):
     event = get_object_or_404(Event, pk=event_id)
     try:
         scoring_station = event.scoringstation_set.get(station_num=station_num)
-        return render(request, 'scoring/station_detail.html', {'scoring_station': scoring_station})
+#        return render(request, 'scoring/station_detail.html', {'scoring_station': scoring_station})
+        return render(request, 'scoring/station_card.html', {'scoring_station': scoring_station})
     except ObjectDoesNotExist:
         return render(request, 'scoring/not_in_use.html', {'event_name': event.name, "current_event_id": event.current_event_id, 'station_num': station_num, 'target': 'station'})
 
