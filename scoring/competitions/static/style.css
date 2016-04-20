@@ -8,8 +8,19 @@ table,th,td {
 }
 table.header, table.header th, table.header td {border:0;padding-left:10px;padding-bottom:5px;}
 table.content th, table.content td {padding:10px;}
+.athlete-name {
+    background-color: rgb(153,236,65);
+    color: black;
+    font-size: 20vh;
+    font-weight: bold;
+    letter-spacing: 2px;
+    padding-top: 2px;
+    padding-left: 20px;
+    padding-bottom: 10px;
+    text-align: center;
+}
 .score {font-size: 50vh;}
-.comp-text {color: black;}
+.comp-text {color: black; overflow-y: hidden;}
 .timer {
     float: right;font-size: 20vh;
 }
@@ -18,14 +29,15 @@ table.content th, table.content td {padding:10px;}
 }
 .timer-large {
     width: 100%;
-    font-size: 40vh;text-align: center;
+    font-size: 40vh;
+    text-align: center;
 }
 .timer-half {
-   font-size: 40vh;
+   font-size: 35vh;
    text-align: center; 
 }
 .score-half {
-   font-size: 40vh;
+   font-size: 35vh;
    text-align: center;
 }
 #increment {
