@@ -3,6 +3,7 @@
 <head>
     <title>{{ scoring_station }}</title>
     <script src="/static/jquery-2.0.3.min.js"></script>
+    <script src="/static/moment.js"></script>
     <script src="/static/scoring.js"></script>
     <script language="JavaScript">
         var stationNum = {{scoring_station.station_num}};
@@ -111,8 +112,44 @@
 
         var myCounter = null;
         var eventStarted = false;
+        var countdownStarted = 0;
+        var initialCountdown = 0;
+        var eventTimer = null;
+        var seconds = 0;
 
         function startOrStopTimer() {
+            if ( countdownStarted == 1 ) {
+                stopCountdown();
+            }
+            else {
+                countdownStarted = 1;
+                seconds = 10; // initial countdown for lifters before actual lift countdown starts
+                document.getElementById("timer").innerHTML = moment(moment.duration(seconds*1000).minutes(), "mm").format("mm") + ":" + moment(moment.duration(seconds*1000).seconds(), "ss").format("ss");
+                postTimer();
+                initialCountdown = 1;
+                eventTimer = setInterval(function(){ countdown() }, 1000);
+            }
+        }
+
+        function stopCountdown() {
+            clearInterval(eventTimer);
+            countdownStarted = 0;
+        }
+
+        function countdown() {
+            seconds = seconds - 1;
+            document.getElementById("timer").innerHTML = moment(moment.duration(seconds*1000).minutes(), "mm").format("mm") + ":" + moment(moment.duration(seconds*1000).seconds(), "ss").format("ss");
+            postTimer();
+            if (seconds == 1 && initialCountdown == 1) {
+                    seconds = seconds + {{scoring_station.event.duration_seconds}}; // add event duration time
+                    initialCountdown = 0;
+            }
+            if (seconds == 0) {
+                stopCountdown();
+            }
+        }
+
+        function startOrStopTimerBackup() {
             // If already started stop
             if ( myCounter != null ) {
                 myCounter.stop();
