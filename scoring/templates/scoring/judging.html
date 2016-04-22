@@ -96,19 +96,6 @@
             document.getElementById("score").innerHTML = '0';
             doCenter();
         }
-        function formatSecondsAsTime(secs) {
-            var format = 'mm:ss';
-            var hr  = Math.floor(secs / 3600);
-            var min = Math.floor((secs - (hr * 3600))/60);
-            var sec = Math.floor(secs - (hr * 3600) -  (min * 60));
-
-            if (min < 10) { min = "0" + min; }
-            if (sec < 10)  { sec  = "0" + sec; }
-
-            var formatted_time = format.replace('mm', min);
-            formatted_time = formatted_time.replace('ss', sec);
-            return formatted_time;
-        }
 
         var myCounter = null;
         var eventStarted = false;
@@ -127,6 +114,7 @@
                 document.getElementById("timer").innerHTML = moment(moment.duration(seconds*1000).minutes(), "mm").format("mm") + ":" + moment(moment.duration(seconds*1000).seconds(), "ss").format("ss");
                 postTimer();
                 initialCountdown = 1;
+                document.getElementById("beep-long").play();
                 eventTimer = setInterval(function(){ countdown() }, 1000);
             }
         }
@@ -140,63 +128,24 @@
             seconds = seconds - 1;
             document.getElementById("timer").innerHTML = moment(moment.duration(seconds*1000).minutes(), "mm").format("mm") + ":" + moment(moment.duration(seconds*1000).seconds(), "ss").format("ss");
             postTimer();
-            if (seconds == 1 && initialCountdown == 1) {
-                    seconds = seconds + {{scoring_station.event.duration_seconds}}; // add event duration time
-                    initialCountdown = 0;
-            }
+
             if (seconds == 0) {
                 stopCountdown();
+                document.getElementById("beep-long").play();
+            }
+            else if (seconds <= 3) {
+                document.getElementById("beep-short").play();
+            }
+            else if (seconds == {{scoring_station.event.duration_seconds}}) {
+                document.getElementById("beep-long").play();
+            }
+
+            if (seconds == 1 && initialCountdown == 1) {
+                seconds = seconds + {{scoring_station.event.duration_seconds}}; // add event duration time
+                initialCountdown = 0;
             }
         }
 
-        function startOrStopTimerBackup() {
-            // If already started stop
-            if ( myCounter != null ) {
-                myCounter.stop();
-                myCounter = null;
-                eventStarted = false;
-                return;
-            }
-
-            var secs = 10; // initial countdown time
-            if ( eventStarted ) {
-                secs = {{scoring_station.event.duration_seconds}}; // 10*60 secs == 10 minutes; actual event countdown time
-            }
-
-            myCounter = new Countdown({
-                seconds: secs,  // number of seconds to count down
-                onUpdateStatus: function(sec){
-                    document.getElementById("timer").innerHTML = formatSecondsAsTime(sec);
-                    if ( stationNum == 1 ) {
-                        postTimer();
-                        // Only station #1 plays sounds
-                        if ( sec == 10 ) {
-                            document.getElementById("beep-long").load();
-                            document.getElementById("beep-long").play();
-                        }
-                        if ( sec <= 3 ) {
-                            document.getElementById("beep-short").load();
-                            document.getElementById("beep-short").play();
-                        }
-                    }
-                }, // callback for each second
-                onCounterEnd: function(){
-                    document.getElementById("timer").innerHTML = '00:00';
-                    myCounter = null;
-
-                    if ( !eventStarted ) {
-                        eventStarted = true;
-                        startOrStopTimer();
-                    }
-                    else {
-                        eventStarted = false;
-                        postTimer();
-                    }
-                } // final action
-            });
-
-            myCounter.start();
-        }
     </script>
     <audio id="beep-short" src="/static/beep-short.mp3" preload="auto"></audio>
     <audio id="beep-long" src="/static/beep-long.mp3" preload="auto"></audio>
