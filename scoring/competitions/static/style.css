@@ -19,8 +19,9 @@ table.content th, table.content td {padding:10px;}
     padding-bottom: 10px;
     text-align: center;
 }
+.spectator-text {color: black; overflow-y: hidden;}
 .score {font-size: 50vh;}
-.comp-text {color: black; overflow-y: hidden;}
+.comp-text {color: black;}
 .timer {
     float: right;font-size: 20vh;
 }
