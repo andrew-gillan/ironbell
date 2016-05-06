@@ -133,7 +133,7 @@
                 stopCountdown();
                 document.getElementById("beep-long").play();
             }
-            else if (seconds <= 3) {
+            else if (seconds <= 3 && initialCountdown == 1) {
                 document.getElementById("beep-short").play();
             }
             else if (seconds == {{scoring_station.event.duration_seconds}}) {
