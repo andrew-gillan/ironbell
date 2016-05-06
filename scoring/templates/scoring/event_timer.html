@@ -19,14 +19,12 @@
     </script>
     <link rel="stylesheet" type="text/css" href="/static/style.css">
 </head>
-<body class="comp-text">
 
-    <div id="header">
-        <div id="header-inner">
-            <h2>Event - {{ event.name }}</h2>
-            <div>Scheduled start time: {{ event.scheduled_start_datetime }}</div>
-        </div>
-    </div>
+<header>
+    <div class="athlete-name">{{ event.name }}</div>
+</header>
+
+<body class="comp-text">
 
     <div id="timer-large" class="timer-large comp-text">00:00</div>
 
