@@ -15,8 +15,8 @@
                 doCenter();
             });
             $(document).keydown(function(e) {
-                if ( stationNum == 1 && e.keyCode == '83' ) {
-                    // 's' - Only station #1 can start/stop the timer
+                if ( stationNum == 1 && e.keyCode == '32' ) {
+                    // Space Bar - Only station #1 can start/stop the timer
                     startOrStopTimer();
                 }
                 else if (e.keyCode == '39') {

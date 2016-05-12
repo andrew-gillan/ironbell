@@ -150,6 +150,8 @@
 </header>
 
 <body class="comp-text">
+    <form>{% csrf_token %}</form>
+
     <!-- show a large score display for the athlete to see -->
     <div id="score" class="timer-large comp-text">{{ scoring_station.score }}</div>
 </body>

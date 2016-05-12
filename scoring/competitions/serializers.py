@@ -19,6 +19,18 @@ class EventTimerSerializer(serializers.ModelSerializer):
         else:
             return -1
 
+class EventStartTimeSerializer(serializers.ModelSerializer):
+    current_event_id = serializers.SerializerMethodField('get_current_event_id')
+    class Meta:
+        model = Event
+        fields = ('id', 'start_time', 'current_event_id')
+    def get_current_event_id(self, obj):
+        current_event = obj.event_locations.all()[0].current_event
+        if current_event:
+            return current_event.id
+        else:
+            return -1
+
 class ScoringStationSerializer(serializers.ModelSerializer):
     current_event_id = serializers.SerializerMethodField('get_current_event_id')
     event = serializers.SlugRelatedField(read_only=True, slug_field='timer')

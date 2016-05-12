@@ -7,7 +7,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from competitions.serializers import EventSerializer, ScoringStationSerializer, EventTimerSerializer
+from competitions.serializers import EventSerializer, ScoringStationSerializer, EventTimerSerializer, EventStartTimeSerializer
 from competitions.models import Competition, Event, ScoringStation
 
 def index(request):
@@ -93,6 +93,24 @@ def json_score(request, event_id, station_num, format=None):
 
     elif request.method == 'POST':
         serializer = ScoringStationSerializer(scoring_station, data=request.DATA)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET', 'POST'])
+def json_start_time(request, pk, format=None):
+    try:
+        event = Event.objects.get(pk=pk)
+    except Event.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        serializer = EventStartTimeSerializer(event)
+        return Response(serializer.data)
+
+    elif request.method == 'POST':
+        serializer = EventStartTimeSerializer(event, data=request.DATA)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)

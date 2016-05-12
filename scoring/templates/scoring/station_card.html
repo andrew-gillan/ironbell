@@ -3,18 +3,218 @@
 <head>
     <title>{{ scoring_station }}</title>
     <script src="/static/jquery-2.0.3.min.js"></script>
+    <script src="/static/moment.js"></script>
     <script src="/static/scoring.js"></script>
     <script language="JavaScript">
+        var stationNum = {{scoring_station.station_num}};
+        var interval = null;
         $(document).ready(function(){
-            setInterval(function(){ getScoreAndTiming({{ scoring_station.event.id }}, {{ scoring_station.station_num }}) }, 250);
+            $(window).load(function(){
+                doCenter();
+            });
+            $(window).resize(function(){
+                doCenter();
+            });
+            $(document).keydown(function(e) {
+                if ( stationNum == 1 && e.keyCode == '32' ) {
+                    // Space Bar - Only station #1 can start/stop the timer
+                    //startOrStopTimer();
+                    postStartTime(new Date().getTime() + 3000);
+                }
+                else if (e.keyCode == '39') {
+                    // Right cursor key
+                    incrementScore();
+                }
+                else if (e.keyCode == '37') {
+                    // Left cursor key
+                    decrementScore();
+                }
+                else if (e.keyCode == '82' && !e.metaKey ) {
+                    // 'r'... as long as Command key is not also typed
+                    resetScore();
+                }
+            });
+            // To initially run the centering and getScore functions:
+            $(window).load();
+
+            // Judging stations call getTimer only to check for "event" assignment changes
+            interval = setInterval(function(){getStartTime({{scoring_station.event.id}})}, 250);
         });
+
+        function decrementScore() {
+            // Get value from element on the page:
+            var score = parseInt(document.getElementById("score-half").innerHTML);
+            score--;
+
+            updateAndPostScore(score);
+        }
+
+        function incrementScore() {
+            // Get value from element on the page:
+            var score = parseInt(document.getElementById("score-half").innerHTML);
+            score++;
+
+            updateAndPostScore(score);
+        }
+
+        function updateAndPostScore(score) {
+            // update local view
+            document.getElementById("score-half").innerHTML = score + "";
+            doCenter();
+
+            // Send the current score using post
+            var data = {
+                id: {{scoring_station.id}},
+                score: score,
+                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+            };
+            var posting = $.post( '/api/score/{{scoring_station.event.id}}/{{scoring_station.station_num}}', data );
+        }
+
+        function postStartTime(startTime) {
+            // Send the data using post
+            var data = {
+                id: {{scoring_station.event.id}},
+                start_time: startTime,
+                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+            };
+
+            var posting = $.post( '/api/start_time/{{scoring_station.event.id}}', data );
+        }
+
+        function getStartTime(eventId){
+            $.ajax({
+                type: 'GET',
+                dataType: "json",
+                url: '/api/start_time/' + eventId,
+                success: function(data){
+                    if (data.start_time > new Date().getTime()) {
+                        clearInterval(interval);
+                        runTimer(data.start_time, document.getElementById("timer-half"));
+                    }
+
+                    checkCurrentEvent(data, eventId);
+                }
+            });
+        }
+
+        function resetScore() {
+            // Send reset data using post
+            var data = {
+                id: {{scoring_station.id}},
+                score: 0,
+                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+            };
+
+            var posting = $.post( '/api/score/{{scoring_station.event.id}}/{{scoring_station.station_num}}', data );
+
+            // Reset local view
+            document.getElementById("score-half").innerHTML = '0';
+            doCenter();
+        }
+
+        var myCounter = null;
+        var eventStarted = false;
+        var countdownStarted = 0;
+        var initialCountdown = 0;
+        var eventTimer = null;
+        var seconds = 0;
+
+        function startOrStopTimer() {
+            if ( countdownStarted == 1 ) {
+                stopCountdown();
+            }
+            else {
+                countdownStarted = 1;
+                seconds = 10; // initial countdown for lifters before actual lift countdown starts
+                document.getElementById("timer-half").innerHTML = moment(moment.duration(seconds*1000).minutes(), "mm").format("mm") + ":" + moment(moment.duration(seconds*1000).seconds(), "ss").format("ss");
+                postTimer();
+                initialCountdown = 1;
+                document.getElementById("beep-long").play();
+                eventTimer = setInterval(function(){ countdown() }, 1000);
+            }
+        }
+
+        function stopCountdown() {
+            clearInterval(eventTimer);
+            countdownStarted = 0;
+        }
+
+        function countdown() {
+            seconds = seconds - 1;
+            document.getElementById("timer-half").innerHTML = moment(moment.duration(seconds*1000).minutes(), "mm").format("mm") + ":" + moment(moment.duration(seconds*1000).seconds(), "ss").format("ss");
+            postTimer();
+
+            if (seconds == 0) {
+                stopCountdown();
+                document.getElementById("beep-long").play();
+            }
+            else if (seconds <= 3 && initialCountdown == 1) {
+                document.getElementById("beep-short").play();
+            }
+            else if (seconds == {{scoring_station.event.duration_seconds}}) {
+                document.getElementById("beep-long").play();
+            }
+
+            if (seconds == 1 && initialCountdown == 1) {
+                seconds = seconds + {{scoring_station.event.duration_seconds}}; // add event duration time
+                initialCountdown = 0;
+            }
+        }
+
+		// global timeout reference we can use to stop it
+		var timeout;
+
+		// timer demo function with normal/self-adjusting argument
+		function runTimer(startTime, clock)
+		{
+            var seconds = 30;
+            // update clock
+			clock.innerHTML = "Starting...";
+
+			// set the initial timeout period
+			var now = new Date().getTime();
+			var timeoutPeriod = startTime - now;
+			var expectedTime = startTime;
+
+			// timer instance function
+			function instance()
+			{
+                now = new Date().getTime();
+
+                // update clock
+                if (seconds >= 0) {
+                    clock.innerHTML = moment(moment.duration(seconds*1000).minutes(), "mm").format("mm") + ":" + moment(moment.duration(seconds*1000).seconds(), "ss").format("ss");
+                    seconds--;
+                }
+                else {
+                    return;
+                }
+
+				// work out the elapsed time and set new timeout value
+				timeoutPeriod = 1000 - (now - expectedTime);
+				expectedTime = expectedTime + 1000;
+
+				// set timeout for the next instance
+    			timeout = setTimeout(function() { instance(); }, timeoutPeriod);
+
+			};
+
+			// now kick everything off with the first timer instance
+			timeout = setTimeout(function() { instance(); }, timeoutPeriod);
+		}
+
     </script>
+    <audio id="beep-short" src="/static/beep-short.mp3" preload="auto"></audio>
+    <audio id="beep-long" src="/static/beep-long.mp3" preload="auto"></audio>
     <link rel="stylesheet" type="text/css" href="/static/style.css">
 </head>
 <header>
     <div class="athlete-name">{{ scoring_station.athlete.name }}</div>
 </header>
 <body class="spectator-text">
+    <form>{% csrf_token %}</form>
+
     <div id="timer-half" class="timer-half">00:00</div>
     <div id="score-half" class="score-half">{{ scoring_station.score }}</div>
 </body>

@@ -18,4 +18,5 @@ urlpatterns = patterns('',
     url(r'^api/event/(?P<pk>[0-9]+)$', 'scoring.views.json_event'),
     url(r'^api/score/(?P<event_id>\d+)/(?P<station_num>\d+)$', 'scoring.views.json_score'),
     url(r'^api/timer/(?P<pk>[0-9]+)$', 'scoring.views.json_timer'),
+    url(r'^api/start_time/(?P<pk>[0-9]+)$', 'scoring.views.json_start_time'),
 )
