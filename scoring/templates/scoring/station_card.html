@@ -7,19 +7,12 @@
     <script src="/static/scoring.js"></script>
     <script language="JavaScript">
         var stationNum = {{scoring_station.station_num}};
-        var interval = null;
+        var checkStartTime = null;
         $(document).ready(function(){
-            $(window).load(function(){
-                doCenter();
-            });
-            $(window).resize(function(){
-                doCenter();
-            });
             $(document).keydown(function(e) {
                 if ( stationNum == 1 && e.keyCode == '32' ) {
                     // Space Bar - Only station #1 can start/stop the timer
-                    //startOrStopTimer();
-                    postStartTime(new Date().getTime() + 3000);
+                    postStartTime(new Date().getTime() + 2000);
                 }
                 else if (e.keyCode == '39') {
                     // Right cursor key
@@ -37,8 +30,8 @@
             // To initially run the centering and getScore functions:
             $(window).load();
 
-            // Judging stations call getTimer only to check for "event" assignment changes
-            interval = setInterval(function(){getStartTime({{scoring_station.event.id}})}, 250);
+            // Check for new event start time
+            checkStartTime = setInterval(function(){getStartTime({{scoring_station.event.id}})}, 250);
         });
 
         function decrementScore() {
@@ -89,7 +82,7 @@
                 url: '/api/start_time/' + eventId,
                 success: function(data){
                     if (data.start_time > new Date().getTime()) {
-                        clearInterval(interval);
+                        clearInterval(checkStartTime);
                         runTimer(data.start_time, document.getElementById("timer-half"));
                     }
 
@@ -110,65 +103,17 @@
 
             // Reset local view
             document.getElementById("score-half").innerHTML = '0';
-            doCenter();
-        }
-
-        var myCounter = null;
-        var eventStarted = false;
-        var countdownStarted = 0;
-        var initialCountdown = 0;
-        var eventTimer = null;
-        var seconds = 0;
-
-        function startOrStopTimer() {
-            if ( countdownStarted == 1 ) {
-                stopCountdown();
-            }
-            else {
-                countdownStarted = 1;
-                seconds = 10; // initial countdown for lifters before actual lift countdown starts
-                document.getElementById("timer-half").innerHTML = moment(moment.duration(seconds*1000).minutes(), "mm").format("mm") + ":" + moment(moment.duration(seconds*1000).seconds(), "ss").format("ss");
-                postTimer();
-                initialCountdown = 1;
-                document.getElementById("beep-long").play();
-                eventTimer = setInterval(function(){ countdown() }, 1000);
-            }
-        }
-
-        function stopCountdown() {
-            clearInterval(eventTimer);
-            countdownStarted = 0;
-        }
-
-        function countdown() {
-            seconds = seconds - 1;
-            document.getElementById("timer-half").innerHTML = moment(moment.duration(seconds*1000).minutes(), "mm").format("mm") + ":" + moment(moment.duration(seconds*1000).seconds(), "ss").format("ss");
-            postTimer();
-
-            if (seconds == 0) {
-                stopCountdown();
-                document.getElementById("beep-long").play();
-            }
-            else if (seconds <= 3 && initialCountdown == 1) {
-                document.getElementById("beep-short").play();
-            }
-            else if (seconds == {{scoring_station.event.duration_seconds}}) {
-                document.getElementById("beep-long").play();
-            }
-
-            if (seconds == 1 && initialCountdown == 1) {
-                seconds = seconds + {{scoring_station.event.duration_seconds}}; // add event duration time
-                initialCountdown = 0;
-            }
         }
 
 		// global timeout reference we can use to stop it
-		var timeout;
+		var eventTimer = null;
 
 		// timer demo function with normal/self-adjusting argument
 		function runTimer(startTime, clock)
 		{
-            var seconds = 30;
+            var seconds = 5;
+            var initialCountdown = 1;
+
             // update clock
 			clock.innerHTML = "Starting...";
 
@@ -182,12 +127,26 @@
 			{
                 now = new Date().getTime();
 
+                if (seconds == 0) {
+                    document.getElementById("beep-long").play();
+                }
+                else if (seconds <= 3 && initialCountdown == 1) {
+                    document.getElementById("beep-short").play();
+                }
+
+                if (seconds == 0 && initialCountdown == 1) {
+                    seconds = seconds + 20; //{{scoring_station.event.duration_seconds}}; // add event duration time
+                    initialCountdown = 0;
+                }
+
                 // update clock
                 if (seconds >= 0) {
                     clock.innerHTML = moment(moment.duration(seconds*1000).minutes(), "mm").format("mm") + ":" + moment(moment.duration(seconds*1000).seconds(), "ss").format("ss");
                     seconds--;
                 }
                 else {
+                    // Check for new event start time
+                    checkStartTime = setInterval(function(){getStartTime({{scoring_station.event.id}})}, 250);
                     return;
                 }
 
@@ -196,12 +155,12 @@
 				expectedTime = expectedTime + 1000;
 
 				// set timeout for the next instance
-    			timeout = setTimeout(function() { instance(); }, timeoutPeriod);
+    			eventTimer = setTimeout(function() { instance(); }, timeoutPeriod);
 
 			};
 
 			// now kick everything off with the first timer instance
-			timeout = setTimeout(function() { instance(); }, timeoutPeriod);
+			eventTimer = setTimeout(function() { instance(); }, timeoutPeriod);
 		}
 
     </script>
