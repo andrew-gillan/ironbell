@@ -7,12 +7,27 @@
     <script src="/static/scoring.js"></script>
     <script language="JavaScript">
         var stationNum = {{scoring_station.station_num}};
+
+        var seconds = -1;
+        var countdown = 0;
+        var initialCountdown = 0;
+        var startTime = 0;
+
+		// global timeout references
+		var eventTimer = null;
         var checkStartTime = null;
+
         $(document).ready(function(){
             $(document).keydown(function(e) {
                 if ( stationNum == 1 && e.keyCode == '32' ) {
                     // Space Bar - Only station #1 can start/stop the timer
-                    postStartTime(new Date().getTime() + 2000);
+                    if (countdown == 0) {
+                        var now = new Date();
+                        postStartTime(now.getTime() - now.getMilliseconds() + 1000);
+                    }
+                    else {
+                        countdown = 0;
+                    }
                 }
                 else if (e.keyCode == '39') {
                     // Right cursor key
@@ -22,13 +37,21 @@
                     // Left cursor key
                     decrementScore();
                 }
-                else if (e.keyCode == '82' && !e.metaKey ) {
-                    // 'r'... as long as Command key is not also typed
+                else if (e.keyCode == '27') {
+                    // Esc key
+                    countdown = 0;
+                    initialCountdown = 0;
+                    seconds = -1
+                    document.getElementById("timer-half").innerHTML = "00:00"
                     resetScore();
                 }
             });
-            // To initially run the centering and getScore functions:
-            $(window).load();
+
+			// set the initial timeout period and start the one second timer loop
+			var now = new Date();
+			var timeoutPeriod = 2000 - now.getMilliseconds(); // set timeout to trigger on second boundary, also use 2000 ms - now.ms to ensure timeout period isn't tool small
+			var expectedTime = now.getTime() + timeoutPeriod;
+            setTimeout(oneSecondLoop, timeoutPeriod, expectedTime);
 
             // Check for new event start time
             checkStartTime = setInterval(function(){getStartTime({{scoring_station.event.id}})}, 250);
@@ -48,6 +71,20 @@
             score++;
 
             updateAndPostScore(score);
+        }
+
+        function resetScore() {
+            // Send reset data using post
+            var data = {
+                id: {{scoring_station.id}},
+                score: 0,
+                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+            };
+
+            var posting = $.post( '/api/score/{{scoring_station.event.id}}/{{scoring_station.station_num}}', data );
+
+            // Reset local view
+            document.getElementById("score-half").innerHTML = '0';
         }
 
         function updateAndPostScore(score) {
@@ -81,9 +118,8 @@
                 dataType: "json",
                 url: '/api/start_time/' + eventId,
                 success: function(data){
-                    if (data.start_time > new Date().getTime()) {
-                        clearInterval(checkStartTime);
-                        runTimer(data.start_time, document.getElementById("timer-half"));
+                    if (data.start_time > startTime) {
+                        startTime = data.start_time;
                     }
 
                     checkCurrentEvent(data, eventId);
@@ -91,42 +127,16 @@
             });
         }
 
-        function resetScore() {
-            // Send reset data using post
-            var data = {
-                id: {{scoring_station.id}},
-                score: 0,
-                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
-            };
+		function oneSecondLoop(expectedTime) {
+            var now = new Date().getTime();
 
-            var posting = $.post( '/api/score/{{scoring_station.event.id}}/{{scoring_station.station_num}}', data );
+            if (startTime == expectedTime) {
+                countdown = 1;
+                initialCountdown = 1;
+                seconds = 10;
+            }
 
-            // Reset local view
-            document.getElementById("score-half").innerHTML = '0';
-        }
-
-		// global timeout reference we can use to stop it
-		var eventTimer = null;
-
-		// timer demo function with normal/self-adjusting argument
-		function runTimer(startTime, clock)
-		{
-            var seconds = 5;
-            var initialCountdown = 1;
-
-            // update clock
-			clock.innerHTML = "Starting...";
-
-			// set the initial timeout period
-			var now = new Date().getTime();
-			var timeoutPeriod = startTime - now;
-			var expectedTime = startTime;
-
-			// timer instance function
-			function instance()
-			{
-                now = new Date().getTime();
-
+            if (countdown == 1) {
                 if (seconds == 0) {
                     document.getElementById("beep-long").play();
                 }
@@ -135,32 +145,25 @@
                 }
 
                 if (seconds == 0 && initialCountdown == 1) {
-                    seconds = seconds + 20; //{{scoring_station.event.duration_seconds}}; // add event duration time
+                    seconds = seconds + {{scoring_station.event.duration_seconds}}; // add event duration time
                     initialCountdown = 0;
                 }
 
                 // update clock
                 if (seconds >= 0) {
-                    clock.innerHTML = moment(moment.duration(seconds*1000).minutes(), "mm").format("mm") + ":" + moment(moment.duration(seconds*1000).seconds(), "ss").format("ss");
+                    document.getElementById("timer-half").innerHTML = moment(moment.duration(seconds*1000).minutes(), "mm").format("mm") + ":" + moment(moment.duration(seconds*1000).seconds(), "ss").format("ss");
                     seconds--;
                 }
                 else {
-                    // Check for new event start time
-                    checkStartTime = setInterval(function(){getStartTime({{scoring_station.event.id}})}, 250);
-                    return;
+                    countdown = 0;
                 }
+            }
 
-				// work out the elapsed time and set new timeout value
-				timeoutPeriod = 1000 - (now - expectedTime);
-				expectedTime = expectedTime + 1000;
+            // work out the elapsed time and set new timeout value
+            var timeoutPeriod = 1000 - (now - expectedTime);
 
-				// set timeout for the next instance
-    			eventTimer = setTimeout(function() { instance(); }, timeoutPeriod);
-
-			};
-
-			// now kick everything off with the first timer instance
-			eventTimer = setTimeout(function() { instance(); }, timeoutPeriod);
+            // set timeout for the next instance
+            eventTimer = setTimeout(oneSecondLoop, timeoutPeriod, expectedTime + 1000);
 		}
 
     </script>
