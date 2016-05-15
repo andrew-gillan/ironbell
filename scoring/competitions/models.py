@@ -80,6 +80,7 @@ class Event(models.Model):
     event_type = models.CharField(max_length=200, choices=EVENT_TYPE_CHOICES)
     timer = models.CharField(max_length=5, default='00:00')
     start_time = models.IntegerField(default=0)
+    countdown_duration = models.IntegerField(default=0)
 
     def __unicode__(self):
         return unicode(self.name)

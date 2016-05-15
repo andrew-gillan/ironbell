@@ -12,6 +12,7 @@
         var countdown = 0;
         var initialCountdown = 0;
         var startTime = 0;
+        var countdownDuration = 0;
 
 		// global timeout references
 		var eventTimer = null;
@@ -23,10 +24,10 @@
                     // Space Bar - Only station #1 can start/stop the timer
                     if (countdown == 0) {
                         var now = new Date();
-                        postStartTime(now.getTime() - now.getMilliseconds() + 1000);
+                        postStartTime(now.getTime() - now.getMilliseconds() + 2000, seconds);
                     }
                     else {
-                        countdown = 0;
+                        postStartTime(-1, seconds);
                     }
                 }
                 else if (e.keyCode == '39') {
@@ -37,13 +38,28 @@
                     // Left cursor key
                     decrementScore();
                 }
-                else if (e.keyCode == '27') {
-                    // Esc key
-                    countdown = 0;
-                    initialCountdown = 0;
-                    seconds = -1
-                    document.getElementById("timer-half").innerHTML = "00:00"
+                else if (e.keyCode == '82') {
+                    // 'r' key - Reset station score
                     resetScore();
+                }
+                else if (e.keyCode == '27' && stationNum == 1) {
+                    // Esc key
+                    postStartTime(-1, -1);
+                }
+                else if ((e.keyCode == '48' || e.keyCode == '96') && stationNum == 1) {
+                    // Number 0 - Start the official competition timer duration as set in the DB
+                    var now = new Date();
+                    postStartTime(now.getTime() - now.getMilliseconds() + 2000, 10); // flag this by setting the duration to the 10 second initial timer
+                }
+                else if ((e.keyCode == '51' || e.keyCode == '99') && stationNum == 1) {
+                    // Number 3
+                    var now = new Date();
+                    postStartTime(now.getTime() - now.getMilliseconds() + 2000, 3 * 60);
+                }
+                else if ((e.keyCode == '53' || e.keyCode == '101') && stationNum == 1) {
+                    // Number 3
+                    var now = new Date();
+                    postStartTime(now.getTime() - now.getMilliseconds() + 2000, 5 * 60);
                 }
             });
 
@@ -101,11 +117,12 @@
             var posting = $.post( '/api/score/{{scoring_station.event.id}}/{{scoring_station.station_num}}', data );
         }
 
-        function postStartTime(startTime) {
+        function postStartTime(startTime, countdownDuration) {
             // Send the data using post
             var data = {
                 id: {{scoring_station.event.id}},
                 start_time: startTime,
+                countdown_duration: countdownDuration,
                 csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
             };
 
@@ -120,6 +137,17 @@
                 success: function(data){
                     if (data.start_time > startTime) {
                         startTime = data.start_time;
+                        countdownDuration = data.countdown_duration;
+                    }
+                    else if (data.start_time == -1 && data.countdown_duration > 0) {
+                        countdown = 0;
+                    }
+                    else if (data.start_time == -1 && data.countdown_duration == -1) {
+                        countdown = 0;
+                        initialCountdown = 0;
+                        seconds = 0;
+                        document.getElementById("timer-half").innerHTML = "00:00"
+//                        resetScore();
                     }
 
                     checkCurrentEvent(data, eventId);
@@ -132,8 +160,11 @@
 
             if (startTime == expectedTime) {
                 countdown = 1;
-                initialCountdown = 1;
-                seconds = 10;
+                seconds = countdownDuration;
+
+                if (countdownDuration == 10) {
+                    initialCountdown = 1;
+                }
             }
 
             if (countdown == 1) {
@@ -156,6 +187,7 @@
                 }
                 else {
                     countdown = 0;
+                    intitialCountdown = 0;
                 }
             }
 

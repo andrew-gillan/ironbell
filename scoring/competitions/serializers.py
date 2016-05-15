@@ -23,7 +23,7 @@ class EventStartTimeSerializer(serializers.ModelSerializer):
     current_event_id = serializers.SerializerMethodField('get_current_event_id')
     class Meta:
         model = Event
-        fields = ('id', 'start_time', 'current_event_id')
+        fields = ('id', 'start_time', 'countdown_duration', 'current_event_id')
     def get_current_event_id(self, obj):
         current_event = obj.event_locations.all()[0].current_event
         if current_event:
