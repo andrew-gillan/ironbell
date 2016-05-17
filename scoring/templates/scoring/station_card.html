@@ -20,17 +20,7 @@
 
         $(document).ready(function(){
             $(document).keydown(function(e) {
-                if ( stationNum == 1 && e.keyCode == '32' ) {
-                    // Space Bar - Only station #1 can start/stop the timer
-                    if (countdown == 0) {
-                        var now = new Date();
-                        postStartTime(now.getTime() - now.getMilliseconds() + 2000, seconds);
-                    }
-                    else {
-                        postStartTime(-1, seconds);
-                    }
-                }
-                else if (e.keyCode == '39') {
+                if (e.keyCode == '39') {
                     // Right cursor key
                     incrementScore();
                 }
@@ -43,21 +33,21 @@
                     resetScore();
                 }
                 else if (e.keyCode == '27' && stationNum == 1) {
-                    // Esc key
+                    // Esc key - Reset system timer
                     postStartTime(-1, -1);
                 }
-                else if ((e.keyCode == '48' || e.keyCode == '96') && stationNum == 1) {
+                else if (e.keyCode == '48' && stationNum == 1) {
                     // Number 0 - Start the official competition timer duration as set in the DB
                     var now = new Date();
                     postStartTime(now.getTime() - now.getMilliseconds() + 2000, 10); // flag this by setting the duration to the 10 second initial timer
                 }
-                else if ((e.keyCode == '51' || e.keyCode == '99') && stationNum == 1) {
-                    // Number 3
+                else if (e.keyCode == '51' && stationNum == 1) {
+                    // Number 3 - three minute timer
                     var now = new Date();
                     postStartTime(now.getTime() - now.getMilliseconds() + 2000, 3 * 60);
                 }
-                else if ((e.keyCode == '53' || e.keyCode == '101') && stationNum == 1) {
-                    // Number 3
+                else if (e.keyCode == '53' && stationNum == 1) {
+                    // Number 5 - five minute timer
                     var now = new Date();
                     postStartTime(now.getTime() - now.getMilliseconds() + 2000, 5 * 60);
                 }
@@ -147,7 +137,6 @@
                         initialCountdown = 0;
                         seconds = 0;
                         document.getElementById("timer-half").innerHTML = "00:00"
-//                        resetScore();
                     }
 
                     checkCurrentEvent(data, eventId);
@@ -168,10 +157,10 @@
             }
 
             if (countdown == 1) {
-                if (seconds == 0) {
+                if (seconds == 0 && stationNum == 1) {
                     document.getElementById("beep-long").play();
                 }
-                else if (seconds <= 3 && initialCountdown == 1) {
+                else if (seconds <= 3 && initialCountdown == 1 && stationNum == 1) {
                     document.getElementById("beep-short").play();
                 }
 
