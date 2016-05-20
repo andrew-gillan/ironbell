@@ -21,15 +21,18 @@ class EventTimerSerializer(serializers.ModelSerializer):
 
 class EventStartTimeSerializer(serializers.ModelSerializer):
     current_event_id = serializers.SerializerMethodField('get_current_event_id')
+    station_score = serializers.SerializerMethodField('get_station_score')
     class Meta:
         model = Event
-        fields = ('id', 'start_time', 'countdown_duration', 'current_event_id')
+        fields = ('id', 'start_time', 'station_score', 'countdown_duration', 'current_event_id')
     def get_current_event_id(self, obj):
         current_event = obj.event_locations.all()[0].current_event
         if current_event:
             return current_event.id
         else:
             return -1
+    def get_station_score(self, obj):
+        return {'station1':obj.scoringstation_set.all()[0].score, 'station2':obj.scoringstation_set.all()[1].score, 'station3':obj.scoringstation_set.all()[2].score, 'station4':obj.scoringstation_set.all()[3].score}
 
 class ScoringStationSerializer(serializers.ModelSerializer):
     current_event_id = serializers.SerializerMethodField('get_current_event_id')

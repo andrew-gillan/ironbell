@@ -43,7 +43,7 @@ def station_score(request, event_id, station_num):
     event = get_object_or_404(Event, pk=event_id)
     scoring_station = event.scoringstation_set.get(station_num=station_num)
     #scoring_station = get_object_or_404(ScoringStation, pk=scoring_station_id)
-    return render(request, 'scoring/station_score.html', {'scoring_station': scoring_station})
+    return render(request, 'scoring/station_score2.html', {'scoring_station': scoring_station})
 
 def judging(request, event_id, station_num):
     event = get_object_or_404(Event, pk=event_id)

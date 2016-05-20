@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ scoring_station }}</title>
+    <script src="/static/jquery-2.0.3.min.js"></script>
+    <script src="/static/moment.js"></script>
+    <script src="/static/scoring.js"></script>
+    <script language="JavaScript">
+        var stationNum = {{scoring_station.station_num}};
+
+        var seconds = -1;
+        var countdown = 0;
+        var initialCountdown = 0;
+        var startTime = 0;
+        var countdownDuration = 0;
+
+		// global timeout references
+		var eventTimer = null;
+        var checkStartTime = null;
+
+        $(document).ready(function(){
+ 			// set the initial timeout period and start the one second timer loop
+			var now = new Date();
+			var timeoutPeriod = 2000 - now.getMilliseconds(); // set timeout to trigger on second boundary, also use 2000 ms - now.ms to ensure timeout period isn't tool small
+			var expectedTime = now.getTime() + timeoutPeriod;
+            setTimeout(oneSecondLoop, timeoutPeriod, expectedTime);
+
+            // Check for new event start time
+            checkStartTime = setInterval(function(){getStartTime({{scoring_station.event.id}});}, 250);
+        });
+
+        function getStartTime(eventId){
+            $.ajax({
+                type: 'GET',
+                dataType: "json",
+                url: '/api/start_time/' + eventId,
+                success: function(data){
+                    if (data.start_time > startTime) {
+                        startTime = data.start_time;
+                        countdownDuration = data.countdown_duration;
+                    }
+                    else if (data.start_time == -1 && data.countdown_duration > 0) {
+                        countdown = 0;
+                    }
+                    else if (data.start_time == -1 && data.countdown_duration == -1) {
+                        countdown = 0;
+                        initialCountdown = 0;
+                        seconds = 0;
+                        document.getElementById("timer-half").innerHTML = "00:00"
+                    }
+
+                    document.getElementById("score-half").innerHTML = data.station_score.station{{scoring_station.station_num}};
+
+                    checkCurrentEvent(data, eventId);
+                }
+            });
+        }
+
+		function oneSecondLoop(expectedTime) {
+            var now = new Date().getTime();
+
+            if (startTime == expectedTime) {
+                countdown = 1;
+                seconds = countdownDuration;
+
+                if (countdownDuration == 10) {
+                    initialCountdown = 1;
+                }
+            }
+
+            if (countdown == 1) {
+                if (seconds == 0 && initialCountdown == 1) {
+                    seconds = seconds + {{scoring_station.event.duration_seconds}}; // add event duration time
+                    initialCountdown = 0;
+                }
+
+                // update clock
+                if (seconds >= 0) {
+                    document.getElementById("timer-half").innerHTML = moment(moment.duration(seconds*1000).minutes(), "mm").format("mm") + ":" + moment(moment.duration(seconds*1000).seconds(), "ss").format("ss");
+                    seconds--;
+                }
+                else {
+                    countdown = 0;
+                    intitialCountdown = 0;
+                }
+            }
+
+            // work out the elapsed time and set new timeout value
+            var timeoutPeriod = 1000 - (now - expectedTime);
+
+            // set timeout for the next instance
+            eventTimer = setTimeout(oneSecondLoop, timeoutPeriod, expectedTime + 1000);
+		}
+
+    </script>
+    <link rel="stylesheet" type="text/css" href="/static/style.css">
+</head>
+<header>
+    <div class="athlete-name">{{ scoring_station.athlete.name }}</div>
+</header>
+<body class="spectator-text">
+    <form>{% csrf_token %}</form>
+
+    <div id="timer-half" class="timer-half">00:00</div>
+    <div id="score-half" class="score-half">{{ scoring_station.score }}</div>
+</body>
+</html>
