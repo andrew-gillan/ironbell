@@ -11,7 +11,9 @@ table.content th, table.content td {padding:10px;}
 .athlete-name {
     background-color: rgb(153,236,65);
     color: black;
-    font-size: 15vh;
+    white-space: nowrap;
+    overflow-x: hidden;
+    font-size: calc(4vw + 4vh + 2vmin);
     font-weight: bold;
     letter-spacing: 5px;
     padding-top: 2px;

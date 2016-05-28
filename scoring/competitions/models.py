@@ -32,12 +32,14 @@ class Athlete(models.Model):
         ('up to 63kg',  'up to 63kg'),
         ('up to 68kg',  'up to 68kg'),
         #FEMALE ONLY
+        ('over 63kg',   'over 63kg'),
         ('over 68kg',   'over 68kg'),
         #MALE ONLY
         ('up to 73kg',  'up to 73kg'),
         ('up to 78kg',  'up to 78kg'),
         ('up to 85kg',  'up to 85kg'),
         ('up to 95kg',  'up to 95kg'),
+        ('over 95kg',   'over 95kg'),
         ('up to 105kg', 'up to 105kg'),
         ('over 105kg',  'over 105kg'),
     )
@@ -71,6 +73,8 @@ class Event(models.Model):
         ('biathlon-snatch', 'Biathlon Snatch'),
         ('longcycle', 'Long Cycle'),
         ('snatch', 'Snatch Only'),
+        ('combined-snatch', 'Snatch'),
+        ('oalc', 'OALC'),
         ('chairpress', 'Chair Press Relay'),
     )
     competition = models.ForeignKey(Competition, default=1)
