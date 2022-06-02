@@ -5,7 +5,7 @@ colorama==0.2.5
 django-extensions==1.6.1
 djangorestframework==2.4.8
 docutils==0.12
-html5lib==0.999
+html5lib==0.99999999
 requests==2.2.1
 six==1.5.2
 suit==2.0.2
